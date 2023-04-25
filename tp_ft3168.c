@@ -61,10 +61,10 @@ esp_err_t ft3168_i2c_init(i2c_port_t i2c_port, int sda, int scl)
         .mode = I2C_MODE_MASTER,
         .sda_io_num = sda,
         .scl_io_num = scl,
-        // .sda_pullup_en = GPIO_PULLUP_ENABLE,
-        // .scl_pullup_en = GPIO_PULLUP_ENABLE,
-        .sda_pullup_en = GPIO_PULLUP_DISABLE,
-        .scl_pullup_en = GPIO_PULLUP_DISABLE,
+        .sda_pullup_en = GPIO_PULLUP_ENABLE,
+        .scl_pullup_en = GPIO_PULLUP_ENABLE,
+        // .sda_pullup_en = GPIO_PULLUP_DISABLE,
+        // .scl_pullup_en = GPIO_PULLUP_DISABLE,
         .master.clk_speed = 100000,
     };
 
@@ -140,136 +140,154 @@ esp_err_t ft3168_set_g_state(i2c_port_t i2c_num, TickType_t ticks_to_wait, uint8
 
 
 
+
+
+
+typedef struct{
+	uint16_t axisX;
+	uint16_t axisY;
+	uint8_t Index;
+	uint8_t evt;
+	uint8_t ID;
+}touch_point_t;
+touch_point_t Point;
+
+
+
+
+
 void ft3168_test()
 {
-    ft3168_i2c_init(I2C_NUM_0, 13, 14);
+    ft3168_i2c_init(I2C_NUM_1, 8, 9);
+
+
+
+
+    /* Reset */
+    gpio_reset_pin(GPIO_NUM_7);
+    gpio_set_direction(GPIO_NUM_7, GPIO_MODE_OUTPUT);
+    gpio_set_pull_mode(GPIO_NUM_7, GPIO_PULLUP_ONLY);
+    gpio_set_level(GPIO_NUM_7, 1);
+    vTaskDelay(pdMS_TO_TICKS(10));
+    gpio_set_level(GPIO_NUM_7, 0);
+    vTaskDelay(pdMS_TO_TICKS(200));
+    gpio_set_level(GPIO_NUM_7, 1);
+    // vTaskDelay(pdMS_TO_TICKS(300));
+
+
+    /* Set int pin */
+    gpio_reset_pin(GPIO_NUM_6);
+    gpio_set_direction(GPIO_NUM_6, GPIO_MODE_INPUT);
 
 
 
 
 
-    gpio_reset_pin(GPIO_NUM_1);
-    gpio_set_direction(GPIO_NUM_1, GPIO_MODE_OUTPUT);
-    gpio_set_pull_mode(GPIO_NUM_1, GPIO_PULLUP_ONLY);
-    gpio_set_level(GPIO_NUM_1, 1);
-    vTaskDelay(pdMS_TO_TICKS(100));
-    gpio_set_level(GPIO_NUM_1, 0);
-    vTaskDelay(pdMS_TO_TICKS(100));
-    gpio_set_level(GPIO_NUM_1, 1);
-    vTaskDelay(pdMS_TO_TICKS(300));
 
-
-
-    gpio_reset_pin(GPIO_NUM_15);
-    gpio_set_direction(GPIO_NUM_15, GPIO_MODE_INPUT_OUTPUT);
-    gpio_set_pull_mode(GPIO_NUM_15, GPIO_PULLUP_PULLDOWN);
-
-
-
-
-
-
-    uint8_t id = ft3168_get_id(I2C_NUM_0, portMAX_DELAY);
-    printf("ID %d 0x%X\n", id, id);
-    vTaskDelay(pdMS_TO_TICKS(100));
-
-
-
-
-
-    uint8_t buffer[5];
-
-    // buffer[0] = 0x00;
-    // buffer[1] = 0x00;
-    // i2c_master_write_to_device(I2C_NUM_0, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
-
-
-    // ft3168_set_g_state(I2C_NUM_0, portMAX_DELAY, 0x00);
-    // ft3168_set_mode(I2C_NUM_0, portMAX_DELAY, 0x00);
-
-
-    // // uint8_t buffer[5];
-    // buffer[0] = 0x86;
-    // buffer[1] = 0x00;
-    // i2c_master_write_to_device(I2C_NUM_0, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
-    // vTaskDelay(pdMS_TO_TICKS(100));
-
-
-    // buffer[0] = 0xA4;
-    // buffer[1] = 0x00;
-    // i2c_master_write_to_device(I2C_NUM_0, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
-    // vTaskDelay(pdMS_TO_TICKS(100));
-
-
-    // buffer[0] = 0xAE;
-    // buffer[1] = 0x00;
-    // i2c_master_write_to_device(I2C_NUM_0, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
-    // vTaskDelay(pdMS_TO_TICKS(100));
-
-
-    // buffer[0] = 0xA5;
-    // buffer[1] = 0x03;
-    // i2c_master_write_to_device(I2C_NUM_0, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
+    // uint8_t id = ft3168_get_id(I2C_NUM_1, portMAX_DELAY);
+    // printf("ID %d 0x%X\n", id, id);
     // vTaskDelay(pdMS_TO_TICKS(100));
 
 
 
-    uint8_t ret = 0;
-    int x, y;
-    while (1) {
+    uint8_t buffer[7] = {0xFF};
 
-        // ret = ft3168_is_touched(I2C_NUM_0, portMAX_DELAY);
+    // 00正常模式04工厂模式
+    buffer[0] = 0x00;
+    buffer[1] = 0x00;
+    i2c_master_write_to_device(I2C_NUM_1, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
 
-        // printf("%d 0x%X\n", ret, ret);
+    // 配置芯片功耗模式
+    buffer[0] = 0xA5;
+    buffer[1] = 0x00;
+    i2c_master_write_to_device(I2C_NUM_1, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
 
+    // 配置工作模式01正常
+    buffer[0] = 0xBC;
+    buffer[1] = 0x01;
+    i2c_master_write_to_device(I2C_NUM_1, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
 
-        // buffer[0] = 0x00;
-        // buffer[1] = 0x00;
-        // i2c_master_write_to_device(I2C_NUM_0, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
-        ft3168_read_coor(I2C_NUM_0, portMAX_DELAY, &x, &y);
+    // 00禁止进入监视器模式
+    buffer[0] = 0x86;
+    buffer[1] = 0x01;
+    i2c_master_write_to_device(I2C_NUM_1, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
 
+    // 配置没有触摸多久进入监视器模式
+    buffer[0] = 0x87;
+    buffer[1] = 0x05;
+    i2c_master_write_to_device(I2C_NUM_1, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
 
-        // printf("gpio: %d\n", gpio_get_level(GPIO_NUM_15));
-        // if (gpio_get_level(GPIO_NUM_15) == 0) {
-        //     // gpio_set_level(GPIO_NUM_15, 1);
-        //     ft3168_read_coor(I2C_NUM_0, portMAX_DELAY, &x, &y);
-        // }
+    // 00禁用手势
+    buffer[0] = 0xD0;
+    buffer[1] = 0x01;
+    i2c_master_write_to_device(I2C_NUM_1, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
 
+    // 00禁用手势
+    buffer[0] = 0xD1;
+    buffer[1] = 0x30;
+    i2c_master_write_to_device(I2C_NUM_1, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
 
-        // buffer[0] = 0x02;
-        // buffer[1] = 0x00;
-        // i2c_master_write_to_device(I2C_NUM_0, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
-
-        // buffer[0] = 0x03;
-        // buffer[1] = 0x00;
-        // i2c_master_write_to_device(I2C_NUM_0, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
-
-        // buffer[0] = 0x04;
-        // buffer[1] = 0x00;
-        // i2c_master_write_to_device(I2C_NUM_0, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
-
-        // buffer[0] = 0x05;
-        // buffer[1] = 0x00;
-        // i2c_master_write_to_device(I2C_NUM_0, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
-
-        // buffer[0] = 0x06;
-        // buffer[1] = 0x00;
-        // i2c_master_write_to_device(I2C_NUM_0, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
-
-
-        // buffer[0] = 0x00;
-        // buffer[1] = 0x00;
-        // i2c_master_write_to_device(I2C_NUM_0, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
-
-        // buffer[0] = 0x00;
-        // buffer[1] = 0x00;
-        // i2c_master_write_to_device(I2C_NUM_0, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
+    // 配置工作模式01正常
+    buffer[0] = 0xA5;
+    buffer[1] = 0x01;
+    i2c_master_write_to_device(I2C_NUM_1, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
 
 
 
-        vTaskDelay(pdMS_TO_TICKS(100));
+    buffer[0] = 0xA6;
+    i2c_master_write_read_device(I2C_NUM_1, _ADDR_SLAVE, buffer, 1, &buffer[1], 1, portMAX_DELAY);
+    if (buffer[1] == 0xFF) {
+		printf("Touch I2c Init Failed[0x%02x]\n", buffer[1]);
+		while (1);
+	} else {
+		printf("Touch I2c Init Success[0x%02x]\n", buffer[1]);
+	}
+
+
+
+
+    uint8_t addr = 0x00;
+
+    
+
+    while (1)
+    {
+
+        if (gpio_get_level(GPIO_NUM_6) == 0) {
+            
+
+            i2c_master_write_read_device(I2C_NUM_1, _ADDR_SLAVE, &addr, 1, buffer, 7, portMAX_DELAY);
+
+            printf(" TD_STATUS [%d]\n", buffer[0x02]);
+            if(buffer[0x02] == 0x01) {
+                Point.ID 	= (buffer[0x05] >> 4) & 0x0f;
+                Point.evt 	= (buffer[0x03] >> 6) & 0x3;
+                Point.axisX = ((buffer[0x03] & 0x0f) << 8) | buffer[0x04];
+                Point.axisY = ((buffer[0x05] & 0x0f) << 8) | buffer[0x06];
+                printf("ID[%d] ID[0x%02x] X[%d] Y[%d]\n", Point.ID, Point.evt, Point.axisX, Point.axisY);
+            }
+
+        }
+
+
+
+
+
+
+
+        vTaskDelay(pdMS_TO_TICKS(10));
+
+
+
+
+
+
+
+
 
     }
+
+
 
 
 
