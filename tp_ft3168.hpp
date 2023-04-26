@@ -81,13 +81,19 @@ class tp_ft3168 {
         /* Config */
         inline Config_t config() { return _cfg; }
         inline void config(const Config_t& cfg) { _cfg = cfg; }
-        inline void setPin(const int& scl, const int& sda) { _cfg.pin_scl = scl; _cfg.pin_sda = sda; }
+        inline void setPin(const int& sda, const int& scl, const int& rst, const int& intr)
+        {
+            _cfg.pin_sda = sda;
+            _cfg.pin_scl = scl;
+            _cfg.pin_rst = rst;
+            _cfg.pin_int = intr;
+        }
 
 
-        inline bool init(const int& scl, const int& sda, bool initI2c = true, const uint32_t& speed = 100000)
+        inline bool init(const int& sda, const int& scl, const int& rst = -1, const int& intr = -1, const bool& initI2c = true, const uint32_t& speed = 100000)
         {
             _cfg.clk_speed = speed;
-            setPin(scl, sda);
+            setPin(sda, scl, rst, intr);
             return init(initI2c);
         }
 
@@ -193,6 +199,9 @@ class tp_ft3168 {
 
         inline void getTouchRaw(TouchPoint_t& tp)
         {
+            tp.x = -1;
+            tp.y = -1;
+
             if (_cfg.pin_int > 0) {
                 if (gpio_get_level((gpio_num_t)_cfg.pin_int) != 0) {
                     return;
