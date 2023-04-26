@@ -158,26 +158,26 @@ touch_point_t Point;
 
 void ft3168_test()
 {
-    ft3168_i2c_init(I2C_NUM_1, 8, 9);
+    ft3168_i2c_init(I2C_NUM_1, 14, 13);
 
 
 
 
     /* Reset */
-    gpio_reset_pin(GPIO_NUM_7);
-    gpio_set_direction(GPIO_NUM_7, GPIO_MODE_OUTPUT);
-    gpio_set_pull_mode(GPIO_NUM_7, GPIO_PULLUP_ONLY);
-    gpio_set_level(GPIO_NUM_7, 1);
+    gpio_reset_pin(GPIO_NUM_16);
+    gpio_set_direction(GPIO_NUM_16, GPIO_MODE_OUTPUT);
+    gpio_set_pull_mode(GPIO_NUM_16, GPIO_PULLUP_ONLY);
+    gpio_set_level(GPIO_NUM_16, 1);
     vTaskDelay(pdMS_TO_TICKS(10));
-    gpio_set_level(GPIO_NUM_7, 0);
+    gpio_set_level(GPIO_NUM_16, 0);
     vTaskDelay(pdMS_TO_TICKS(200));
-    gpio_set_level(GPIO_NUM_7, 1);
+    gpio_set_level(GPIO_NUM_16, 1);
     // vTaskDelay(pdMS_TO_TICKS(300));
 
 
     /* Set int pin */
-    gpio_reset_pin(GPIO_NUM_6);
-    gpio_set_direction(GPIO_NUM_6, GPIO_MODE_INPUT);
+    gpio_reset_pin(GPIO_NUM_15);
+    gpio_set_direction(GPIO_NUM_15, GPIO_MODE_INPUT);
 
 
 
@@ -192,45 +192,51 @@ void ft3168_test()
 
     uint8_t buffer[7] = {0xFF};
 
-    // 00正常模式04工厂模式
-    buffer[0] = 0x00;
-    buffer[1] = 0x00;
-    i2c_master_write_to_device(I2C_NUM_1, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
+    // // 00正常模式04工厂模式
+    // buffer[0] = 0x00;
+    // buffer[1] = 0x00;
+    // i2c_master_write_to_device(I2C_NUM_1, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
 
-    // 配置芯片功耗模式
-    buffer[0] = 0xA5;
-    buffer[1] = 0x00;
-    i2c_master_write_to_device(I2C_NUM_1, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
+    // // 配置芯片功耗模式
+    // buffer[0] = 0xA5;
+    // buffer[1] = 0x00;
+    // i2c_master_write_to_device(I2C_NUM_1, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
 
-    // 配置工作模式01正常
-    buffer[0] = 0xBC;
-    buffer[1] = 0x01;
-    i2c_master_write_to_device(I2C_NUM_1, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
+    // // 配置工作模式01正常
+    // buffer[0] = 0xBC;
+    // buffer[1] = 0x01;
+    // i2c_master_write_to_device(I2C_NUM_1, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
 
     // 00禁止进入监视器模式
     buffer[0] = 0x86;
-    buffer[1] = 0x01;
+    buffer[1] = 0x00;
     i2c_master_write_to_device(I2C_NUM_1, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
 
-    // 配置没有触摸多久进入监视器模式
-    buffer[0] = 0x87;
-    buffer[1] = 0x05;
+
+    // 触摸阈值
+    buffer[0] = 0x80;
+    buffer[1] = 0x7D;
     i2c_master_write_to_device(I2C_NUM_1, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
 
-    // 00禁用手势
-    buffer[0] = 0xD0;
-    buffer[1] = 0x01;
-    i2c_master_write_to_device(I2C_NUM_1, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
+    // // 配置没有触摸多久进入监视器模式
+    // buffer[0] = 0x87;
+    // buffer[1] = 0x05;
+    // i2c_master_write_to_device(I2C_NUM_1, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
 
-    // 00禁用手势
-    buffer[0] = 0xD1;
-    buffer[1] = 0x30;
-    i2c_master_write_to_device(I2C_NUM_1, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
+    // // 00禁用手势
+    // buffer[0] = 0xD0;
+    // buffer[1] = 0x01;
+    // i2c_master_write_to_device(I2C_NUM_1, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
 
-    // 配置工作模式01正常
-    buffer[0] = 0xA5;
-    buffer[1] = 0x01;
-    i2c_master_write_to_device(I2C_NUM_1, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
+    // // 00禁用手势
+    // buffer[0] = 0xD1;
+    // buffer[1] = 0x30;
+    // i2c_master_write_to_device(I2C_NUM_1, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
+
+    // // 配置工作模式01正常
+    // buffer[0] = 0xA5;
+    // buffer[1] = 0x01;
+    // i2c_master_write_to_device(I2C_NUM_1, _ADDR_SLAVE, buffer, 2, portMAX_DELAY);
 
 
 
@@ -253,7 +259,7 @@ void ft3168_test()
     while (1)
     {
 
-        if (gpio_get_level(GPIO_NUM_6) == 0) {
+        if (gpio_get_level(GPIO_NUM_15) == 0) {
             
 
             i2c_master_write_read_device(I2C_NUM_1, _ADDR_SLAVE, &addr, 1, buffer, 7, portMAX_DELAY);
