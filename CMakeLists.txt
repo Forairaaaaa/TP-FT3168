@@ -25,3 +25,4 @@ idf_component_register(SRC_DIRS ${FT3168_SRC_DIRS}
                   REQUIRES ${FT3168_REQUIRES}
                   PRIV_REQUIRES ${FT3168_PRIV_REQUIRES}
 )
+
