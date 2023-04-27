@@ -158,6 +158,7 @@ class tp_ft3168 {
         }
 
 
+        /* Setup gpio and reset */
         inline void gpioInit()
         {
             ESP_LOGD(TAG, "setup gpio");
@@ -181,9 +182,12 @@ class tp_ft3168 {
         }
 
 
-        inline void deInit()
+        inline void deInit(bool deInitI2c = false)
         {
             _inited = false;
+            if (deInitI2c) {
+                i2c_driver_delete(_cfg.i2c_port);
+            }
         }
 
 
@@ -208,6 +212,7 @@ class tp_ft3168 {
                 }
             }
 
+            /* Start reading from 0x00 */
             _readReg(0x00, 7);
             if (_data_buffer[2] != 0x00) {
                 tp.event = (_data_buffer[3] >> 6) & 0x03;
